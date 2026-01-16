@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: gym-trainer-bot
-        image: gym-trainer-bot:latest
+        image: vmadiwalakr/trainer:latest
         imagePullPolicy: Never 
         ports:
         - containerPort: 5000

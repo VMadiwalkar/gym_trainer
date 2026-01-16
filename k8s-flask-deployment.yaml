@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gym-trainer-flask
+  namespace: trainer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gym-trainer
+  template:
+    metadata:
+      labels:
+        app: gym-trainer
+    spec:
+      containers:
+      - name: gym-trainer-bot
+        image: gym-trainer-bot:latest
+        imagePullPolicy: Never 
+        ports:
+        - containerPort: 5000
+        env:
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: GEMINI_API_KEY
+              optional: true
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_DB
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gym-trainer-service
+  namespace: trainer
+spec:
+  selector:
+    app: gym-trainer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
